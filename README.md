@@ -7,3 +7,4 @@
 ## 3.察看結果
 ![image](https://github.com/user-attachments/assets/e0c2de79-3e33-4361-95b4-642858739548)
 
+## 同學亦可自行下載HTML檔案查詢
