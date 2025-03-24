@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="author" content="oxxo.studio">
+  <meta name="copyright" content="oxxo.studio">
+  <title>成績查詢</title>
+  <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+  <style>
+    input, select {
+      width: 300px;
+      font-size: 15px;
+      margin: 2px 0;
+      padding: 2px 5px;
+    }
+
+    body {
+      font-size: 18px;
+    }
+
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 800px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      width: 70px;
+      height: 60px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+
+<body>
+  學號：<input id="student"><br/> 
+  選擇課程：
+  <select id="sheetSelect">
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="草稿分組">草稿分組</option>
+    <option value="印1">印1</option>
+    <option value="email網址">email網址</option>
+    <option value="網頁查詢">網頁查詢</option>
+  </select>
+  <br/>
+  <button id="sendBtn">查詢</button><br/>
+  <table id="show">
+    <thead></thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    var appUrl = 'https://script.google.com/macros/s/AKfycbzYpDRKB6ayemKFbKC8USFNsdz9CtHJ8WZjc1zl8pXYnSuY0h-1FakAYuii9M8AfOs6/exec';
+    var sheetsUrl = 'https://docs.google.com/spreadsheets/d/16iaCWcfWUAlCVX9_0oFfyvaySxwUrxlf1xHtzlNTax0/edit?usp=sharing';
+
+    document.getElementById("sendBtn").addEventListener("click", function () {
+      var id = document.getElementById("student").value;
+      var sheetName = document.getElementById("sheetSelect").value;  // 取得選擇的學期
+      
+      console.log("輸入值是: " + id);
+      console.log("選擇的學期: " + sheetName);
+    
+      var requestData = {
+        url: sheetsUrl,
+        name: sheetName,
+        startColumn: id
+      };
+    
+      fetch(appUrl, {
+        method: "POST",
+        redirect: "follow",
+        headers: {
+          "Content-Type": "text/plain;charset=utf-8",
+        },
+        body: JSON.stringify(requestData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("成功:", data);
+      
+        if (data.error) {
+          alert(data.error);
+        } else {
+          var titles = data.title; // 取得標題列
+          var students = data.data; // 取得成績數據
+      
+          var tableHeader = document.querySelector("#show thead");
+          var tableBody = document.querySelector("#show tbody");
+      
+          // 清空表格
+          tableHeader.innerHTML = "";
+          tableBody.innerHTML = "";
+      
+          // 🔥 確保讀取完整標題數量
+          console.log("標題數量:", titles.length);
+          console.log("數據數量:", students.length);
+      
+          // 建立表頭
+          var headerRow = document.createElement("tr");
+          titles.forEach(title => {
+            var th = document.createElement("th");
+            th.innerText = title;
+            headerRow.appendChild(th);
+          });
+          tableHeader.appendChild(headerRow);
+      
+          // 建立數據列
+          var dataRow = document.createElement("tr");
+          students.forEach(score => {
+            var td = document.createElement("td");
+            td.innerText = score ?? 0; // 如果是 null 或 undefined，顯示 0
+            dataRow.appendChild(td);
+          });
+          tableBody.appendChild(dataRow);
+        }
+      })
+      .catch(error => console.error("錯誤:", error));
+      
+    });
+    
+  </script>
+
+</body>
+
+</html>
